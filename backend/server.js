@@ -4,6 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const connectDB = require('./src/config/db');
+const bot = require('./src/bot/index');
 
 const app = express();
 const server = http.createServer(app);
