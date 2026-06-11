@@ -6,6 +6,11 @@ const cors = require('cors');
 const connectDB = require('./src/config/db');
 const bot = require('./src/bot/index');
 
+// API Routes
+const productRoutes = require('./src/routes/products');
+const orderRoutes = require('./src/routes/orders');
+const dashboardRoutes = require('./src/routes/dashboard');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -23,6 +28,11 @@ connectDB();
 app.get('/', (req, res) => {
   res.json({ message: 'BotKart Backend is Running 🚀' });
 });
+
+// Mount API Routes
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Socket.io
 io.on('connection', (socket) => {
