@@ -5,7 +5,7 @@ const catalogCommand = async (ctx) => {
     const products = await Product.find({ inStock: true });
 
     if (products.length === 0) {
-      await ctx.reply('😔 No products available right now. Check back soon!');
+      await ctx.reply('😔 Nothing on the menu right now. Check back soon!');
       return;
     }
 
@@ -13,28 +13,26 @@ const catalogCommand = async (ctx) => {
     const categories = [...new Set(products.map((p) => p.category))];
 
     const categoryEmojis = {
-      Food: '🍔',
-      Drinks: '🥤',
-      Clothing: '👕',
-      Electronics: '📱',
-      Beauty: '💄',
-      Other: '📦',
+      Drinks: '☕',
+      Snacks: '🥪',
+      Mains: '🍕',
+      Desserts: '🍰',
     };
 
-    let message = `🛍️ *Welcome to BotKart Store!*\n\n`;
-    message += `✨ _Discover our amazing collection_\n\n`;
+    let message = `☕ *Welcome to The BotKart Cafe!*\n\n`;
+    message += `✨ _Fresh food, great vibes_\n\n`;
     message += `━━━━━━━━━━━━━━━━━━\n\n`;
-    message += `📂 *Shop by Category:*\n\n`;
+    message += `📂 *Browse our Menu:*\n\n`;
 
     categories.forEach((cat) => {
-      const emoji = categoryEmojis[cat] || '📦';
+      const emoji = categoryEmojis[cat] || '🍽️';
       message += `${emoji} *${cat}*\n`;
     });
 
     message += `\n━━━━━━━━━━━━━━━━━━`;
 
     const buttons = categories.map((cat) => {
-      const emoji = categoryEmojis[cat] || '📦';
+      const emoji = categoryEmojis[cat] || '🍽️';
       return [{ text: `${emoji} ${cat}`, callback_data: `category_${cat}` }];
     });
 

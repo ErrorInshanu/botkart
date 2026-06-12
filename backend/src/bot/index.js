@@ -16,30 +16,33 @@ const attachIO = (io) => {
 bot.start(startCommand);
 
 // Menu button handlers
-bot.hears('🛍️ Shop', catalogCommand);
+bot.hears('🛍️ Menu', catalogCommand);
 bot.hears('📦 My Orders', myOrders);
 
 bot.hears('💬 Support', async (ctx) => {
   await ctx.reply(
     `💬 *Support*\n\n` +
-    `Need help? We are here for you!\n\n` +
+    `Need help? We're here for you!\n\n` +
     `📧 Email: support@botkart.com\n` +
-    `⏰ Available: 9AM - 9PM\n\n` +
-    `_We usually reply within 1 hour_ ✨`,
+    `📱 WhatsApp: +91 98765 43210\n` +
+    `⏰ Available: 10AM - 11PM\n\n` +
+    `_We usually reply within 30 minutes_ ✨`,
     { parse_mode: 'Markdown' }
   );
 });
 
-bot.hears('ℹ️ About', async (ctx) => {
+bot.hears('ℹ️ About Us', async (ctx) => {
   await ctx.reply(
-    `ℹ️ *About BotKart*\n\n` +
-    `🛍️ BotKart is your personal shopping assistant on Telegram!\n\n` +
-    `✨ *Why BotKart?*\n` +
-    `• Shop without leaving Telegram\n` +
-    `• AI powered smart assistant\n` +
-    `• Fast delivery to your doorstep\n` +
-    `• 100% secure payments\n\n` +
-    `_Made with ❤️ for smart shoppers_`,
+    `☕ *About The BotKart Cafe*\n\n` +
+    `We serve freshly made food and drinks delivered straight to your door — all ordered right here on Telegram!\n\n` +
+    `🍕 *What we offer:*\n` +
+    `• Burgers, Pizzas & Mains\n` +
+    `• Cold Coffees & Smoothies\n` +
+    `• Crispy Snacks\n` +
+    `• Desserts & more\n\n` +
+    `⏰ *Hours:* 10 AM – 11 PM, Every Day\n` +
+    `🚀 *Delivery:* 30–45 minutes\n\n` +
+    `_Made with ❤️ for food lovers_`,
     { parse_mode: 'Markdown' }
   );
 });
@@ -47,7 +50,7 @@ bot.hears('ℹ️ About', async (ctx) => {
 // Callback queries (inline button presses)
 bot.on('callback_query', handleCallbacks);
 
-// Free text — handles address capture (Day 5: Groq AI added here)
+// Free text — Groq AI + address capture
 bot.on('text', handleMessage);
 
 bot.launch();
@@ -55,6 +58,6 @@ bot.launch();
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
-console.log('Telegram Bot is running ✅');
+console.log('🚀 The BotKart Cafe bot is running ✅');
 
 module.exports = { bot, attachIO };

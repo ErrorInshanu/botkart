@@ -14,14 +14,16 @@ const startCommand = async (ctx) => {
     );
 
     await ctx.reply(
-      `👋 Welcome to BotKart, ${firstName}!\n\n` +
-      `🛍️ We bring the best products right to your Telegram.\n\n` +
-      `Use the menu below to get started:`,
+      `☕ Welcome to *The BotKart Cafe*, ${firstName}!\n\n` +
+      `🍕 Burgers, Pizzas, Cold Coffees, Desserts — all delivered fresh to your door.\n\n` +
+      `⏰ We're open *10 AM – 11 PM*, every day.\n\n` +
+      `Tap *🛍️ Menu* to start ordering! 👇`,
       {
+        parse_mode: 'Markdown',
         reply_markup: {
           keyboard: [
-            [{ text: '🛍️ Shop' }, { text: '📦 My Orders' }],
-            [{ text: '💬 Support' }, { text: 'ℹ️ About' }],
+            [{ text: '🛍️ Menu' }, { text: '📦 My Orders' }],
+            [{ text: '💬 Support' }, { text: 'ℹ️ About Us' }],
           ],
           resize_keyboard: true,
           persistent: true,
