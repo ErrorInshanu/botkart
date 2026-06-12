@@ -1,3 +1,4 @@
+const socketService = require('./src/services/socketService');
 require('dotenv').config();
 const express = require('express');
 const http = require('http');
@@ -14,7 +15,8 @@ const dashboardRoutes = require('./src/routes/dashboard');
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+  transports: ['polling', 'websocket'],
 });
 
 // Middleware
@@ -35,12 +37,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Socket.io
-io.on('connection', (socket) => {
-  console.log('Owner app connected via socket ✅');
-  socket.on('disconnect', () => {
-    console.log('Owner app disconnected');
-  });
-});
+socketService.init(io);
 
 // Start server
 const PORT = process.env.PORT || 3000;

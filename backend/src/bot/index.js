@@ -60,4 +60,4 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 console.log('🚀 The BotKart Cafe bot is running ✅');
 
-module.exports = { bot, attachIO };
+module.exports = bot;

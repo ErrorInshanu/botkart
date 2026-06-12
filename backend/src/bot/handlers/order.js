@@ -76,11 +76,8 @@ const confirmOrder = async (ctx, address) => {
     await order.save();
 
     // Emit to owner dashboard via Socket.io
-    const io = ctx.telegram._io; // attached in server.js
-    if (io) {
-      io.emit('new_order', { order });
-    }
-
+    const socketService = require('../../services/socketService');
+    socketService.emitNewOrder(order);
     // Clear cart and state
     cartService.clearCart(telegramId);
     cartService.clearAwaitingAddress(telegramId);

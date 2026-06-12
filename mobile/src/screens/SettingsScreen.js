@@ -1,8 +1,18 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { cafeProfile } from '../data/dummyData';
 import { colors } from '../theme/colors';
+
+const cafeProfile = {
+  name: 'The BotKart Cafe',
+  tagline: 'AI-powered food ordering on Telegram',
+  address: 'Mumbai, Maharashtra',
+  phone: '+91 98765 43210',
+  hours: '10 AM – 11 PM',
+  email: 'support@botkart.com',
+  rating: 4.8,
+  totalReviews: 124,
+};
 
 const SETTINGS_SECTIONS = [
   {

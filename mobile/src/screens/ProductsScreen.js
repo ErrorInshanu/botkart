@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Pressable,
@@ -7,16 +8,19 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { products as initialProducts } from '../data/dummyData';
+import { deleteProduct, getProducts } from '../services/api';
 import { colors } from '../theme/colors';
 
 function ProductCard({ item, onEdit, onDelete }) {
+  const initial = item.name?.charAt(0)?.toUpperCase() || '?';
+
   return (
     <View style={styles.card}>
       <View style={styles.emojiWrap}>
-        <Text style={styles.emoji}>{item.emoji}</Text>
+        <Text style={styles.emoji}>{initial}</Text>
       </View>
 
       {!item.inStock && (
@@ -50,7 +54,26 @@ function ProductCard({ item, onEdit, onDelete }) {
 }
 
 export default function ProductsScreen({ navigation }) {
-  const [productList, setProductList] = useState(initialProducts);
+  const [productList, setProductList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await getProducts();
+      setProductList(response.data.products || []);
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [fetchProducts])
+  );
 
   const handleDelete = (item) => {
     Alert.alert('Delete Product', `Remove "${item.name}" from menu?`, [
@@ -58,7 +81,14 @@ export default function ProductsScreen({ navigation }) {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => setProductList((prev) => prev.filter((p) => p.id !== item.id)),
+        onPress: async () => {
+          try {
+            await deleteProduct(item._id);
+            await fetchProducts();
+          } catch (error) {
+            Alert.alert('Error', error.response?.data?.message || 'Failed to delete product');
+          }
+        },
       },
     ]);
   };
@@ -78,23 +108,29 @@ export default function ProductsScreen({ navigation }) {
         </Pressable>
       </View>
 
-      <FlatList
-        data={productList}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.grid}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <ProductCard
-            item={item}
-            onEdit={(product) =>
-              navigation.navigate('AddEditProduct', { mode: 'edit', product })
-            }
-            onDelete={handleDelete}
-          />
-        )}
-      />
+      {loading ? (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={productList}
+          keyExtractor={(item) => item._id}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.grid}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <ProductCard
+              item={item}
+              onEdit={(product) =>
+                navigation.navigate('AddEditProduct', { mode: 'edit', product })
+              }
+              onDelete={handleDelete}
+            />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -134,6 +170,11 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.85,
   },
+  loadingWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   grid: {
     paddingHorizontal: 16,
     paddingBottom: 24,
@@ -154,14 +195,16 @@ const styles = StyleSheet.create({
   emojiWrap: {
     width: 44,
     height: 44,
-    borderRadius: 10,
+    borderRadius: 22,
     backgroundColor: `${colors.primary}15`,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
   },
   emoji: {
-    fontSize: 22,
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.primary,
   },
   outOfStock: {
     position: 'absolute',

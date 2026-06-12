@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -11,8 +13,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { categories } from '../data/dummyData';
+import { addProduct, editProduct } from '../services/api';
 import { colors } from '../theme/colors';
+
+const categories = ['Drinks', 'Snacks', 'Mains', 'Desserts'];
 
 export default function AddEditProductScreen({ route, navigation }) {
   const { mode, product } = route.params || {};
@@ -22,11 +26,39 @@ export default function AddEditProductScreen({ route, navigation }) {
   const [description, setDescription] = useState(product?.description || '');
   const [price, setPrice] = useState(product?.price?.toString() || '');
   const [category, setCategory] = useState(product?.category || categories[0]);
+  const [imageUrl, setImageUrl] = useState(product?.imageUrl || '');
   const [inStock, setInStock] = useState(product?.inStock ?? true);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    navigation.goBack();
+  const handleSave = async () => {
+    if (!name.trim() || !price.trim()) {
+      Alert.alert('Validation Error', 'Name and price are required.');
+      return;
+    }
+
+    const payload = {
+      name: name.trim(),
+      description: description.trim(),
+      price: parseFloat(price),
+      category,
+      imageUrl: imageUrl.trim(),
+      inStock,
+    };
+
+    try {
+      setSaving(true);
+      if (isEdit) {
+        await editProduct(product._id, payload);
+      } else {
+        await addProduct(payload);
+      }
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Error', error.response?.data?.message || 'Failed to save product');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -78,6 +110,19 @@ export default function AddEditProductScreen({ route, navigation }) {
         </View>
 
         <View style={styles.fieldGroup}>
+          <Text style={styles.label}>Image URL</Text>
+          <TextInput
+            style={styles.input}
+            value={imageUrl}
+            onChangeText={setImageUrl}
+            placeholder="https://..."
+            placeholderTextColor={colors.textSecondary}
+            autoCapitalize="none"
+            keyboardType="url"
+          />
+        </View>
+
+        <View style={styles.fieldGroup}>
           <Text style={styles.label}>Category</Text>
           <Pressable
             style={styles.dropdown}
@@ -102,10 +147,15 @@ export default function AddEditProductScreen({ route, navigation }) {
         </View>
 
         <Pressable
-          style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.saveBtn, pressed && !saving && styles.pressed]}
           onPress={handleSave}
+          disabled={saving}
         >
-          <Ionicons name="checkmark" size={20} color={colors.textPrimary} />
+          {saving ? (
+            <ActivityIndicator size="small" color={colors.textPrimary} />
+          ) : (
+            <Ionicons name="checkmark" size={20} color={colors.textPrimary} />
+          )}
           <Text style={styles.saveBtnText}>{isEdit ? 'Save Changes' : 'Add Product'}</Text>
         </Pressable>
       </ScrollView>

@@ -3,8 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TabNavigator from './src/navigation/TabNavigator';
 import { colors } from './src/theme/colors';
+import { useEffect } from 'react';
+import { connectSocket } from './src/services/socket';
 
 export default function App() {
+  useEffect(() => {
+    connectSocket();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <NavigationContainer
