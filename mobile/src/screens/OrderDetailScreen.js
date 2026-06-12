@@ -5,10 +5,12 @@ import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import StatusBadge from '../components/StatusBadge';
+import { updateOrderStatus } from '../services/api';
 import { colors, statusColors } from '../theme/colors';
 
 const STATUS_ACTIONS = [
@@ -27,7 +29,7 @@ function InfoRow({ icon, label, value }) {
       </View>
       <View style={styles.infoContent}>
         <Text style={styles.infoLabel}>{label}</Text>
-        <Text style={styles.infoValue}>{value}</Text>
+        <Text style={styles.infoValue}>{value || '—'}</Text>
       </View>
     </View>
   );
@@ -36,9 +38,19 @@ function InfoRow({ icon, label, value }) {
 export default function OrderDetailScreen({ route, navigation }) {
   const { order: initialOrder } = route.params;
   const [order, setOrder] = useState(initialOrder);
+  const [updating, setUpdating] = useState(false);
 
-  const updateStatus = (status) => {
-    setOrder((prev) => ({ ...prev, status }));
+  const handleStatusUpdate = async (status) => {
+    if (order.status === status) return;
+    try {
+      setUpdating(true);
+      await updateOrderStatus(order._id, status);
+      setOrder((prev) => ({ ...prev, status }));
+    } catch (error) {
+      console.error('Status update error:', error.message);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -55,43 +67,49 @@ export default function OrderDetailScreen({ route, navigation }) {
         <View style={styles.heroCard}>
           <View style={styles.heroTop}>
             <View>
-              <Text style={styles.orderId}>{order.id}</Text>
-              <Text style={styles.placedAt}>Placed {order.time}</Text>
+              <Text style={styles.orderId}>#{order._id?.slice(-6).toUpperCase()}</Text>
+              <Text style={styles.placedAt}>
+                Placed {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
             </View>
             <StatusBadge status={order.status} />
           </View>
-          <Text style={styles.totalAmount}>₹{order.total}</Text>
+          <Text style={styles.totalAmount}>₹{order.totalAmount}</Text>
           <Text style={styles.totalLabel}>Order Total</Text>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Customer</Text>
           <View style={styles.card}>
-            <InfoRow icon="person-outline" label="Name" value={order.customer} />
+            <InfoRow icon="person-outline" label="Name" value={order.customerName} />
             <View style={styles.cardDivider} />
-            <InfoRow icon="call-outline" label="Phone" value={order.phone} />
+            <InfoRow icon="logo-telegram" label="Telegram ID" value={order.telegramId} />
             <View style={styles.cardDivider} />
-            <InfoRow icon="location-outline" label="Address" value={order.address} />
-            <View style={styles.cardDivider} />
-            <InfoRow icon="card-outline" label="Payment" value={order.payment} />
+            <InfoRow icon="location-outline" label="Address" value={order.deliveryAddress} />
+            {order.notes ? (
+              <>
+                <View style={styles.cardDivider} />
+                <InfoRow icon="chatbubble-outline" label="Notes" value={order.notes} />
+              </>
+            ) : null}
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Items ({order.items.length})</Text>
+          <Text style={styles.sectionTitle}>Items ({order.items?.length})</Text>
           <View style={styles.card}>
-            {order.items.map((item, index) => (
+            {order.items?.map((item, index) => (
               <View key={index}>
                 {index > 0 && <View style={styles.cardDivider} />}
                 <View style={styles.itemRow}>
                   <View style={styles.itemQty}>
-                    <Text style={styles.qtyText}>{item.qty}×</Text>
+                    <Text style={styles.qtyText}>{item.quantity}×</Text>
                   </View>
                   <View style={styles.itemInfo}>
                     <Text style={styles.itemName}>{item.name}</Text>
                     <Text style={styles.itemPrice}>₹{item.price} each</Text>
                   </View>
-                  <Text style={styles.itemTotal}>₹{item.qty * item.price}</Text>
+                  <Text style={styles.itemTotal}>₹{item.quantity * item.price}</Text>
                 </View>
               </View>
             ))}
@@ -99,7 +117,9 @@ export default function OrderDetailScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Update Status</Text>
+          <Text style={styles.sectionTitle}>
+            Update Status {updating && <ActivityIndicator size="small" color={colors.primary} />}
+          </Text>
           <View style={styles.statusGrid}>
             {STATUS_ACTIONS.map((action) => {
               const isActive = order.status === action.key;
@@ -114,7 +134,8 @@ export default function OrderDetailScreen({ route, navigation }) {
                       borderColor: actionColor,
                     },
                   ]}
-                  onPress={() => updateStatus(action.key)}
+                  onPress={() => handleStatusUpdate(action.key)}
+                  disabled={updating}
                 >
                   <Ionicons
                     name={action.icon}
