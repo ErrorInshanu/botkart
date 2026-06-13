@@ -116,7 +116,7 @@ export default function OrdersScreen({ navigation }) {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.filters}
-        style={{ height: 44 }}
+        style={{ height: 44, flexShrink: 0, flexGrow: 0 }}
       >
         {FILTERS.map((f) => (
           <FilterPill
