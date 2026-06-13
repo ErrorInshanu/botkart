@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const BASE_URL = 'http://192.168.108.23:3000';
+const BASE_URL = 'https://botkart.onrender.com';
 
 let socket = null;
 
