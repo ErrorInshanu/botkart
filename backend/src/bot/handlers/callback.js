@@ -6,8 +6,8 @@ const Product = require('../../models/product');
 
 const mainMenuKeyboard = {
   keyboard: [
-    ['🛍️ Shop', '📦 My Orders'],
-    ['💬 Support', 'ℹ️ About'],
+    [{ text: '🛍️ Menu' }, { text: '📦 My Orders' }],
+    [{ text: '💬 Support' }, { text: 'ℹ️ About Us' }],
   ],
   resize_keyboard: true,
   one_time_keyboard: false,
